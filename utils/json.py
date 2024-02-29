@@ -7,7 +7,7 @@ import os
 import sys
 import unicodedata
 
-from utils import six
+import six
 
 
 def read_json(filename):
@@ -31,7 +31,8 @@ def read_json(filename):
         try:
             output_dict = jsn.loads(''.join(lines), encoding='utf-8')
         except:
-            raise ValueError('Could not read %s. %s' % (filename, sys.exc_info()[1]))
+            raise ValueError('Could not read %s. %s' %
+                             (filename, sys.exc_info()[1]))
         output_dict = _convert_from_unicode(output_dict)
     return output_dict
 
@@ -92,7 +93,8 @@ def write_dictionary_to_file(input_dict, filename, sortkeys=False):
     if not os.path.exists(d):
         os.makedirs(d)
 
-    item_iterator = six.itersorteditems(input_dict) if sortkeys else six.iteritems(input_dict)
+    item_iterator = six.itersorteditems(
+        input_dict) if sortkeys else six.iteritems(input_dict)
 
     # check for json extension
     ext = os.path.splitext(filename)[1]

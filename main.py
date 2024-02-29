@@ -1,19 +1,25 @@
 from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
-import logging
 import os
+import sys
+from __future__ import print_function
+from __future__ import division
+import logging
 import setproctitle
 import subprocess
-
 import torch
-
 import commandline
 import configuration as config
 import logger
 import runtime
-from utils import zipsource
+import zipsource
+os.chdir(r"C:\Users\Christian\Documents\GitHub\uncertainty-in-nn-training\python\uframe_setting\lightprobnets")
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), 'attacks')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), 'datasets')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), 'utils')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), 'losses')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), 'models')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), 'strings')))
 
 
 def main():
@@ -52,20 +58,24 @@ def main():
     # ------------------------------------------------------
     # Fetch data loaders. Quit if no data loader is present
     # ------------------------------------------------------
-    train_loader, validation_loader, inference_loader = config.configure_data_loaders(args)
+    train_loader, validation_loader, inference_loader = config.configure_data_loaders(
+        args)
 
     # -------------------------------------------------------------------------
     # Check whether any dataset could be found
     # -------------------------------------------------------------------------
-    success = any(loader is not None for loader in [train_loader, validation_loader, inference_loader])
+    success = any(loader is not None for loader in [
+        train_loader, validation_loader, inference_loader])
     if not success:
-        logging.info("No dataset could be loaded successfully. Please check dataset paths!")
+        logging.info(
+            "No dataset could be loaded successfully. Please check dataset paths!")
         quit()
 
     # -------------------------------------------------------------------------
     # Configure runtime augmentations
     # -------------------------------------------------------------------------
-    training_augmentation, validation_augmentation = config.configure_runtime_augmentations(args)
+    training_augmentation, validation_augmentation = config.configure_runtime_augmentations(
+        args)
 
     # ----------------------------------------------------------
     # Configure model and loss.
@@ -101,7 +111,8 @@ def main():
     # -------------------------------------------------------------------------
     # Possibly resume from checkpoint
     # -------------------------------------------------------------------------
-    checkpoint_saver, checkpoint_stats = config.configure_checkpoint_saver(args, model_and_loss)
+    checkpoint_saver, checkpoint_stats = config.configure_checkpoint_saver(
+        args, model_and_loss)
     if checkpoint_stats is not None:
         logging.info("  Checkpoint Statistics:")
         for key, value in checkpoint_stats.items():

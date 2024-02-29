@@ -11,7 +11,7 @@ import numpy as np
 import torch
 import codecs
 import logging
-from . import common
+import common
 from torchvision import transforms
 
 
@@ -82,7 +82,8 @@ class _MNIST(data.Dataset):
             self.train_data, self.train_labels = torch.load(
                 os.path.join(self.root, self.processed_folder, self.training_file))
             if num_examples > 0:
-                indices = common.deterministic_indices(seed=0, k=num_examples, n=len(self.train_data))
+                indices = common.deterministic_indices(
+                    seed=0, k=num_examples, n=len(self.train_data))
                 self.train_data = self.train_data[indices]
                 self.train_labels = self.train_labels[indices]
 
@@ -90,7 +91,8 @@ class _MNIST(data.Dataset):
             self.test_data, self.test_labels = torch.load(
                 os.path.join(self.root, self.processed_folder, self.test_file))
             if num_examples > 0:
-                indices = common.deterministic_indices(seed=1, k=num_examples, n=len(self.test_data))
+                indices = common.deterministic_indices(
+                    seed=1, k=num_examples, n=len(self.test_data))
                 self.test_data = self.test_data[indices]
                 self.test_labels = self.test_labels[indices]
 
@@ -126,7 +128,8 @@ class _MNIST(data.Dataset):
 
     def _check_exists(self):
         return os.path.exists(os.path.join(self.root, self.processed_folder, self.training_file)) and \
-            os.path.exists(os.path.join(self.root, self.processed_folder, self.test_file))
+            os.path.exists(os.path.join(
+                self.root, self.processed_folder, self.test_file))
 
     def download(self):
         """Download the MNIST data if it doesn't exist in processed_folder already."""
@@ -162,12 +165,16 @@ class _MNIST(data.Dataset):
         logging.info('Processing...')
 
         training_set = (
-            read_image_file(os.path.join(self.root, self.raw_folder, 'train-images-idx3-ubyte')),
-            read_label_file(os.path.join(self.root, self.raw_folder, 'train-labels-idx1-ubyte'))
+            read_image_file(os.path.join(
+                self.root, self.raw_folder, 'train-images-idx3-ubyte')),
+            read_label_file(os.path.join(
+                self.root, self.raw_folder, 'train-labels-idx1-ubyte'))
         )
         test_set = (
-            read_image_file(os.path.join(self.root, self.raw_folder, 't10k-images-idx3-ubyte')),
-            read_label_file(os.path.join(self.root, self.raw_folder, 't10k-labels-idx1-ubyte'))
+            read_image_file(os.path.join(
+                self.root, self.raw_folder, 't10k-images-idx3-ubyte')),
+            read_label_file(os.path.join(
+                self.root, self.raw_folder, 't10k-labels-idx1-ubyte'))
         )
         with open(os.path.join(self.root, self.processed_folder, self.training_file), 'wb') as f:
             torch.save(training_set, f)
@@ -183,9 +190,11 @@ class _MNIST(data.Dataset):
         fmt_str += '    Split: {}\n'.format(tmp)
         fmt_str += '    Root Location: {}\n'.format(self.root)
         tmp = '    Transforms (if any): '
-        fmt_str += '{0}{1}\n'.format(tmp, self.transform.__repr__().replace('\n', '\n' + ' ' * len(tmp)))
+        fmt_str += '{0}{1}\n'.format(
+            tmp, self.transform.__repr__().replace('\n', '\n' + ' ' * len(tmp)))
         tmp = '    Target Transforms (if any): '
-        fmt_str += '{0}{1}'.format(tmp, self.target_transform.__repr__().replace('\n', '\n' + ' ' * len(tmp)))
+        fmt_str += '{0}{1}'.format(
+            tmp, self.target_transform.__repr__().replace('\n', '\n' + ' ' * len(tmp)))
         return fmt_str
 
 
@@ -214,7 +223,8 @@ class MnistTrain(Mnist):
             os.makedirs(d)
         # transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))])
         transform = transforms.Compose([transforms.ToTensor()])
-        mnist = _MNIST(root, train=True, download=True, transform=transform, num_examples=num_examples)
+        mnist = _MNIST(root, train=True, download=True,
+                       transform=transform, num_examples=num_examples)
         super(MnistTrain, self).__init__(mnist)
 
 
@@ -225,5 +235,6 @@ class MnistValid(Mnist):
             os.makedirs(d)
         # transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))])
         transform = transforms.Compose([transforms.ToTensor()])
-        mnist = _MNIST(root, train=False, download=True, transform=transform, num_examples=num_examples)
+        mnist = _MNIST(root, train=False, download=True,
+                       transform=transform, num_examples=num_examples)
         super(MnistValid, self).__init__(mnist)

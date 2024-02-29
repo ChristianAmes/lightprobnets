@@ -8,10 +8,10 @@ from glob import glob
 
 from torchvision import transforms as vision_transforms
 
-from . import transforms
-from . import common
+import transforms
+import common
 
-from utils import system
+import system
 
 
 VALIDATE_INDICES = [
@@ -44,7 +44,8 @@ class _Sintel(data.Dataset):
             raise ValueError("Flow directory '%s' not found!")
 
         if flow_root is not None:
-            all_flo_filenames = sorted(glob(os.path.join(flow_root, "*/*.flo")))
+            all_flo_filenames = sorted(
+                glob(os.path.join(flow_root, "*/*.flo")))
         all_img_filenames = sorted(glob(os.path.join(images_root, "*/*.png")))
 
         # Remember base for substraction at runtime
@@ -65,33 +66,36 @@ class _Sintel(data.Dataset):
         self._flow_list = [] if flow_root is not None else None
 
         for base_folder in base_folders:
-            img_filenames = filter(lambda x: base_folder in x, all_img_filenames)
+            img_filenames = filter(
+                lambda x: base_folder in x, all_img_filenames)
             if flow_root is not None:
-                flo_filenames = filter(lambda x: base_folder in x, all_flo_filenames)
+                flo_filenames = filter(
+                    lambda x: base_folder in x, all_flo_filenames)
 
             for i in range(len(img_filenames) - 1):
 
                 im1 = img_filenames[i]
                 im2 = img_filenames[i + 1]
-                self._image_list += [[ im1, im2 ]]
+                self._image_list += [[im1, im2]]
 
                 if flow_root is not None:
                     flo = flo_filenames[i]
-                    self._flow_list += [ flo ]
+                    self._flow_list += [flo]
 
                 # Sanity check
                 im1_base_filename = os.path.splitext(os.path.basename(im1))[0]
                 im2_base_filename = os.path.splitext(os.path.basename(im2))[0]
                 if flow_root is not None:
-                    flo_base_filename = os.path.splitext(os.path.basename(flo))[0]
+                    flo_base_filename = os.path.splitext(
+                        os.path.basename(flo))[0]
                 im1_frame, im1_no = im1_base_filename.split("_")
                 im2_frame, im2_no = im2_base_filename.split("_")
-                assert(im1_frame == im2_frame)
-                assert(int(im1_no) == int(im2_no) - 1)
+                assert (im1_frame == im2_frame)
+                assert (int(im1_no) == int(im2_no) - 1)
                 if flow_root is not None:
                     flo_frame, flo_no = flo_base_filename.split("_")
-                    assert(im1_frame == flo_frame)
-                    assert(int(im1_no) == int(flo_no))
+                    assert (im1_frame == flo_frame)
+                    assert (int(im1_no) == int(flo_no))
 
         if self._flow_list is not None:
             assert len(self._image_list) == len(self._flow_list)
@@ -100,14 +104,16 @@ class _Sintel(data.Dataset):
         # Remove invalid validation indices
         # -------------------------------------------------------------
         full_num_examples = len(self._image_list)
-        validate_indices = [x for x in VALIDATE_INDICES if x in range(full_num_examples)]
+        validate_indices = [
+            x for x in VALIDATE_INDICES if x in range(full_num_examples)]
 
         # ----------------------------------------------------------
         # Construct list of indices for training/validation
         # ----------------------------------------------------------
         list_of_indices = None
         if dstype == "train":
-            list_of_indices = [x for x in range(full_num_examples) if x not in validate_indices]
+            list_of_indices = [x for x in range(
+                full_num_examples) if x not in validate_indices]
         elif dstype == "valid":
             list_of_indices = validate_indices
         elif dstype == "full":
@@ -153,7 +159,8 @@ class _Sintel(data.Dataset):
         im1, im2 = self._photometric_transform(im1_np0, im2_np0)
 
         # e.g. "training/clean/alley_1/frame_XXXX"
-        basename = os.path.splitext(im1_filename.replace(self._substract_base, "")[1:])[0]
+        basename = os.path.splitext(
+            im1_filename.replace(self._substract_base, "")[1:])[0]
 
         # import numpy as np
         # from matplotlib import pyplot as plt

@@ -11,7 +11,7 @@ import torch
 
 import logger
 from holistic_records import EpochRecorder
-from utils.moving_averages import MovingAverage
+from moving_averages import MovingAverage
 
 # --------------------------------------------------------------------------------
 # Exponential moving average smoothing factor for speed estimates
@@ -49,7 +49,8 @@ def create_progressbar(iterable,
     #   rate_inv_fmt, elapsed, remaining, desc, postfix.
     # ---------------------------------------------------------------
     bar_format = ""
-    bar_format += "%s==>%s%s {desc}:%s " % (cyan, reset, bright, reset)  # description
+    # description
+    bar_format += "%s==>%s%s {desc}:%s " % (cyan, reset, bright, reset)
     bar_format += "{percentage:3.0f}%"  # percentage
     bar_format += "%s|{bar}|%s " % (dim, reset)  # bar
     bar_format += " {n_fmt}/{total_fmt}  "  # i/n counter
@@ -89,7 +90,8 @@ def tensor2float_dict(tensor_dict):
 
 def format_moving_averages_as_progress_dict(moving_averages_dict, moving_averages_postfix="avg"):
     value = [
-        (key + moving_averages_postfix, "%1.4f" % moving_averages_dict[key].mean())
+        (key + moving_averages_postfix, "%1.4f" %
+         moving_averages_dict[key].mean())
         for key in sorted(moving_averages_dict.keys())
     ]
     progress_dict = collections.OrderedDict(value)
@@ -138,7 +140,8 @@ class TrainingEpoch:
         # Get input and target tensor keys
         # -------------------------------------------------------------
         input_keys = list(filter(lambda x: "input" in x, example_dict.keys()))
-        target_keys = list(filter(lambda x: "target" in x, example_dict.keys()))
+        target_keys = list(
+            filter(lambda x: "target" in x, example_dict.keys()))
         tensor_keys = input_keys + target_keys
 
         # -------------------------------------------------------------
@@ -221,7 +224,8 @@ class TrainingEpoch:
         with create_progressbar(**progressbar_args) as progress:
             for example_dict in progress:
                 # perform step
-                loss_dict_per_step, output_dict, batch_size = self._step(example_dict)
+                loss_dict_per_step, output_dict, batch_size = self._step(
+                    example_dict)
                 # convert
                 loss_dict_per_step = tensor2float_dict(loss_dict_per_step)
 
@@ -237,7 +241,8 @@ class TrainingEpoch:
                 # Add moving averages
                 # --------------------------------------------------------
                 for key, loss in loss_dict_per_step.items():
-                    moving_averages_dict[key].add_average(loss, addcount=batch_size)
+                    moving_averages_dict[key].add_average(
+                        loss, addcount=batch_size)
 
                 # view statistics in progress bar
                 progress_stats = format_moving_averages_as_progress_dict(
@@ -249,7 +254,8 @@ class TrainingEpoch:
         # -------------------------------------------------------------
         # Return loss and output dictionary
         # -------------------------------------------------------------
-        ema_loss_dict = {key: ma.mean() for key, ma in moving_averages_dict.items()}
+        ema_loss_dict = {key: ma.mean()
+                         for key, ma in moving_averages_dict.items()}
         return ema_loss_dict, output_dict
 
 
@@ -280,7 +286,8 @@ class EvaluationEpoch:
         # Get input and target tensor keys
         # -------------------------------------------------------------
         input_keys = list(filter(lambda x: "input" in x, example_dict.keys()))
-        target_keys = list(filter(lambda x: "target" in x, example_dict.keys()))
+        target_keys = list(
+            filter(lambda x: "target" in x, example_dict.keys()))
         tensor_keys = input_keys + target_keys
 
         # -------------------------------------------------------------
@@ -349,7 +356,8 @@ class EvaluationEpoch:
                 # ---------------------------------------
                 # Perform forward evaluation step
                 # ---------------------------------------
-                loss_dict_per_step, output_dict, batch_size = self._step(example_dict)
+                loss_dict_per_step, output_dict, batch_size = self._step(
+                    example_dict)
 
                 # ---------------------------------------
                 # recorder
@@ -375,7 +383,8 @@ class EvaluationEpoch:
                 # Add moving averages
                 # --------------------------------------------------------
                 for key, loss in loss_dict_per_step.items():
-                    moving_averages_dict[key].add_average(loss, addcount=batch_size)
+                    moving_averages_dict[key].add_average(
+                        loss, addcount=batch_size)
 
                 # view statistics in progress bar
                 progress_stats = format_moving_averages_as_progress_dict(
@@ -387,7 +396,8 @@ class EvaluationEpoch:
         # -------------------------------------------------------------
         # Record average losses
         # -------------------------------------------------------------
-        avg_loss_dict = {key: ma.mean() for key, ma in moving_averages_dict.items()}
+        avg_loss_dict = {key: ma.mean()
+                         for key, ma in moving_averages_dict.items()}
         self._recorder.add_scalars("evaluation_losses", avg_loss_dict)
 
         # -------------------------------------------------------------
@@ -412,7 +422,8 @@ def exec_runtime(args,
     # Validation schedulers are a bit special:
     # They want to be called with a validation loss..
     # ----------------------------------------------------------------------------------------------
-    validation_scheduler = (lr_scheduler is not None and args.lr_scheduler == "ReduceLROnPlateau")
+    validation_scheduler = (
+        lr_scheduler is not None and args.lr_scheduler == "ReduceLROnPlateau")
 
     # --------------------------------------------------------
     # Log some runtime info
@@ -471,9 +482,11 @@ def exec_runtime(args,
             # Always report learning rate and model
             # --------------------------------------------------------
             if lr_scheduler is None:
-                logging.info("model: %s  lr: %s" % (args.model, format_learning_rate(args.optimizer_lr)))
+                logging.info("model: %s  lr: %s" % (
+                    args.model, format_learning_rate(args.optimizer_lr)))
             else:
-                logging.info("model: %s  lr: %s" % (args.model, format_learning_rate(lr_scheduler.get_lr())))
+                logging.info("model: %s  lr: %s" % (
+                    args.model, format_learning_rate(lr_scheduler.get_lr())))
 
             # -------------------------------------------
             # Create and run a training epoch
@@ -512,7 +525,8 @@ def exec_runtime(args,
                 # ----------------------------------------------------------------
                 # Evaluate valdiation losses
                 # ----------------------------------------------------------------
-                validation_losses = [avg_loss_dict[vkey] for vkey in args.validation_keys]
+                validation_losses = [avg_loss_dict[vkey]
+                                     for vkey in args.validation_keys]
                 for i, (vkey, vminimize) in enumerate(zip(args.validation_keys, args.validation_keys_minimize)):
                     if vminimize:
                         store_as_best[i] = validation_losses[i] < best_validation_losses[i]

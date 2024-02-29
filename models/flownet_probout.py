@@ -4,8 +4,8 @@ from __future__ import print_function
 
 import torch
 import torch.nn as nn
-from .flownet1s import FlowNetS
-from .flownet_helpers import upsample2d_as
+from flownet1s import FlowNetS
+from flownet_helpers import upsample2d_as
 
 
 class FlowNetProbOut(nn.Module):
@@ -33,9 +33,11 @@ class FlowNetProbOut(nn.Module):
             flow2 = self._flownets(inputs)
             flow2_mean, flow2_log_variance = flow2.chunk(chunks=2, dim=1)
 
-            flow1_mean = (1.0 / self._div_flow) * upsample2d_as(flow2_mean, im1, mode="bilinear")
+            flow1_mean = (1.0 / self._div_flow) * \
+                upsample2d_as(flow2_mean, im1, mode="bilinear")
 
-            z = upsample2d_as(torch.exp(flow2_log_variance) * (1.0/self._div_flow)**2, im1, mode="bilinear")
+            z = upsample2d_as(torch.exp(flow2_log_variance)
+                              * (1.0/self._div_flow)**2, im1, mode="bilinear")
             flow1_log_variance = torch.log(z)
 
             output_dict['flow1'] = flow1_mean, flow1_log_variance

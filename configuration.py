@@ -14,10 +14,10 @@ from torch import nn
 from torch.utils.data import DataLoader
 
 import logger
-from utils import json
-from utils import strings
-from utils import system
-from utils import type_inference as typeinf
+import json
+import strings
+import system
+import type_inference as typeinf
 
 
 # ---------------------------------------------------
@@ -71,7 +71,8 @@ def configure_runtime_augmentations(args):
         # ----------------------------------------------------
         if args.training_augmentation is not None:
             kwargs = typeinf.kwargs_from_args(args, "training_augmentation")
-            logging.info("training_augmentation: %s" % args.training_augmentation)
+            logging.info("training_augmentation: %s" %
+                         args.training_augmentation)
             for param, default in sorted(kwargs.items()):
                 logging.info("  %s: %s" % (param, default))
             kwargs["args"] = args
@@ -88,7 +89,8 @@ def configure_runtime_augmentations(args):
         # ----------------------------------------------------
         if args.validation_augmentation is not None:
             kwargs = typeinf.kwargs_from_args(args, "validation_augmentation")
-            logging.info("validation_augmentation: %s" % args.training_augmentation)
+            logging.info("validation_augmentation: %s" %
+                         args.training_augmentation)
             for param, default in sorted(kwargs.items()):
                 logging.info("  %s: %s" % (param, default))
             kwargs["args"] = args
@@ -136,12 +138,14 @@ def configure_model_and_loss(args):
         # ---------------------------------------------------------------
         logging.info("Batch Size: %i" % args.batch_size)
         logging.info("Network: %s" % args.model)
-        logging.info("Number of parameters: %i" % model_and_loss.num_parameters())
+        logging.info("Number of parameters: %i" %
+                     model_and_loss.num_parameters())
         if loss is not None:
             logging.info("Training Key: %s" % args.training_key)
             logging.info("Training Loss: %s" % args.loss)
         logging.info("Validation Keys: %s" % args.validation_keys)
-        logging.info("Validation Keys Minimize: %s" % args.validation_keys_minimize)
+        logging.info("Validation Keys Minimize: %s" %
+                     args.validation_keys_minimize)
 
     return model_and_loss
 
@@ -210,7 +214,8 @@ class CheckpointSaver:
         if strict:
             missing = set(own_state.keys()) - set(state_dict.keys())
             if len(missing) > 0:
-                raise KeyError('missing keys in state_dict: "{}"'.format(missing))
+                raise KeyError(
+                    'missing keys in state_dict: "{}"'.format(missing))
 
     def restore(self, filename, model_and_loss, include_params="*", exclude_params=()):
         # -----------------------------------------------------------------------------------------
@@ -234,14 +239,16 @@ class CheckpointSaver:
             include=include_params,
             exclude=exclude_params)
 
-        state_dict = {key: value for key, value in state_dict.items() if key in restore_keys}
+        state_dict = {key: value for key,
+                      value in state_dict.items() if key in restore_keys}
 
         # if parameter lists are given, don't be strict with loading from checkpoints
         strict = True
         if include_params != "*" or len(exclude_params) != 0:
             strict = False
 
-        self._load_state_dict_into_module(state_dict, model_and_loss, strict=strict)
+        self._load_state_dict_into_module(
+            state_dict, model_and_loss, strict=strict)
         logging.info("  Restore keys:")
         for key in restore_keys:
             logging.info("    %s" % key)
@@ -291,7 +298,8 @@ class CheckpointSaver:
             directory, self._prefix + self._latest_postfix + ".json")
 
         torch.save(save_dict, latest_checkpoint_filename)
-        json.write_dictionary_to_file(stats_dict, filename=latest_statistics_filename)
+        json.write_dictionary_to_file(
+            stats_dict, filename=latest_statistics_filename)
 
         # -----------------------------------------------------------------------------------------
         # Possibly store as best
@@ -305,11 +313,14 @@ class CheckpointSaver:
                     directory, self._prefix + self._best_postfix + prefix + ".json")
 
                 shortfile = best_checkpoint_filename.rsplit("/", 1)[1]
-                shortpath = os.path.dirname(best_checkpoint_filename).rsplit("/", 1)[1]
+                shortpath = os.path.dirname(
+                    best_checkpoint_filename).rsplit("/", 1)[1]
                 shortname = os.path.join(shortpath, shortfile)
                 logging.info("Save ckpt to ../%s" % shortname)
-                shutil.copyfile(latest_checkpoint_filename, best_checkpoint_filename)
-                shutil.copyfile(latest_statistics_filename, best_statistics_filename)
+                shutil.copyfile(latest_checkpoint_filename,
+                                best_checkpoint_filename)
+                shutil.copyfile(latest_statistics_filename,
+                                best_statistics_filename)
 
 
 def configure_checkpoint_saver(args, model_and_loss):
@@ -338,17 +349,20 @@ def configure_checkpoint_saver(args, model_and_loss):
                     exclude_params=args.checkpoint_exclude_params)
 
             elif args.checkpoint_mode in ["resume_from_latest"]:
-                logging.info("Loading latest checkpoint in %s" % args.checkpoint)
+                logging.info("Loading latest checkpoint in %s" %
+                             args.checkpoint)
                 checkpoint_stats, filename = checkpoint_saver.restore_latest(
                     directory=args.checkpoint,
                     model_and_loss=model_and_loss,
                     include_params=args.checkpoint_include_params,
                     exclude_params=args.checkpoint_exclude_params)
             else:
-                logging.info("Unknown checkpoint_restore '%s' given!" % args.checkpoint_restore)
+                logging.info("Unknown checkpoint_restore '%s' given!" %
+                             args.checkpoint_restore)
                 quit()
         else:
-            logging.info("Could not find checkpoint file or directory '%s'" % args.checkpoint)
+            logging.info(
+                "Could not find checkpoint file or directory '%s'" % args.checkpoint)
             quit()
 
     return checkpoint_saver, checkpoint_stats
@@ -368,7 +382,8 @@ def configure_data_loaders(args):
 
         def _log_statistics(dataset, prefix, name):
             with logger.LoggingBlock("%s Dataset: %s" % (prefix, name)):
-                example_dict = dataset[0]  # get sizes from first dataset example
+                # get sizes from first dataset example
+                example_dict = dataset[0]
                 for key, value in sorted(example_dict.items()):
                     if key in ["index", "basename"]:  # no need to display these
                         continue
@@ -381,7 +396,8 @@ def configure_data_loaders(args):
         # -----------------------------------------------------------------------------------------
         # GPU parameters
         # -----------------------------------------------------------------------------------------
-        gpuargs = {"num_workers": args.num_workers, "pin_memory": True} if args.cuda else {}
+        gpuargs = {"num_workers": args.num_workers,
+                   "pin_memory": True} if args.cuda else {}
 
         train_loader = None
         validation_loader = None
@@ -401,7 +417,8 @@ def configure_data_loaders(args):
             # ----------------------------------------------
             # Create training dataset
             # ----------------------------------------------
-            train_dataset = typeinf.instance_from_kwargs(args.training_dataset_class, kwargs)
+            train_dataset = typeinf.instance_from_kwargs(
+                args.training_dataset_class, kwargs)
 
             # ----------------------------------------------
             # Create training loader
@@ -413,7 +430,8 @@ def configure_data_loaders(args):
                 drop_last=False,
                 **gpuargs)
 
-            _log_statistics(train_dataset, prefix="Training", name=args.training_dataset)
+            _log_statistics(train_dataset, prefix="Training",
+                            name=args.training_dataset)
 
         # -----------------------------------------------------------------------------------------
         # Validation dataset
@@ -429,7 +447,8 @@ def configure_data_loaders(args):
             # ----------------------------------------------
             # Create validation dataset
             # ----------------------------------------------
-            validation_dataset = typeinf.instance_from_kwargs(args.validation_dataset_class, kwargs)
+            validation_dataset = typeinf.instance_from_kwargs(
+                args.validation_dataset_class, kwargs)
 
             # ----------------------------------------------
             # Create validation loader
@@ -441,7 +460,8 @@ def configure_data_loaders(args):
                 drop_last=False,
                 **gpuargs)
 
-            _log_statistics(validation_dataset, prefix="Validation", name=args.validation_dataset)
+            _log_statistics(validation_dataset,
+                            prefix="Validation", name=args.validation_dataset)
 
     return train_loader, validation_loader, inference_loader
 
@@ -506,14 +526,16 @@ def configure_optimizer(args, model_and_loss):
                     # ---------------------------------------------------------
                     # Add all trainable parameters if there is no param groups
                     # ---------------------------------------------------------
-                    all_trainable_parameters = _generate_trainable_params(model_and_loss)
+                    all_trainable_parameters = _generate_trainable_params(
+                        model_and_loss)
                     kwargs["params"] = all_trainable_parameters
                 else:
                     # -------------------------------------------
                     # Add list of parameter groups instead
                     # -------------------------------------------
                     trainable_parameter_groups = []
-                    dnames, dparams = _param_names_and_trainable_generator(model_and_loss)
+                    dnames, dparams = _param_names_and_trainable_generator(
+                        model_and_loss)
                     dnames = set(dnames)
                     dparams = set(list(dparams))
                     with logger.LoggingBlock("parameter_groups:"):
@@ -540,7 +562,8 @@ def configure_optimizer(args, model_and_loss):
                                 dparams -= set(list(gparams))
 
                         # append default parameter group
-                        trainable_parameter_groups.append({"params": list(dparams)})
+                        trainable_parameter_groups.append(
+                            {"params": list(dparams)})
                         # and log its parameter names
                         with logger.LoggingBlock("default:"):
                             for dname in sorted(dnames):
@@ -552,7 +575,8 @@ def configure_optimizer(args, model_and_loss):
                 # -------------------------------------------
                 # Create optimizer instance
                 # -------------------------------------------
-                optimizer = typeinf.instance_from_kwargs(args.optimizer_class, kwargs)
+                optimizer = typeinf.instance_from_kwargs(
+                    args.optimizer_class, kwargs)
 
     return optimizer
 
@@ -587,7 +611,8 @@ def configure_lr_scheduler(args, optimizer):
             # -------------------------------------------
             # Create lr_scheduler instance
             # -------------------------------------------
-            lr_scheduler = typeinf.instance_from_kwargs(args.lr_scheduler_class, kwargs)
+            lr_scheduler = typeinf.instance_from_kwargs(
+                args.lr_scheduler_class, kwargs)
 
     return lr_scheduler
 

@@ -8,8 +8,8 @@ from glob import glob
 
 from torchvision import transforms as vision_transforms
 
-from . import transforms
-from . import common
+import transforms
+import common
 
 
 VALIDATE_INDICES = [
@@ -85,7 +85,7 @@ class FlyingChairs(data.Dataset):
                  args,
                  root,
                  photometric_augmentations=False,
-                 resize_targets=[-1,-1],
+                 resize_targets=[-1, -1],
                  num_examples=-1,
                  dstype="train"):
 
@@ -95,22 +95,24 @@ class FlyingChairs(data.Dataset):
         # -------------------------------------------------------------
         # filenames for all input images and target flows
         # -------------------------------------------------------------
-        image_filenames = sorted( glob( os.path.join(root, "*.ppm")) )
-        flow_filenames = sorted( glob( os.path.join(root, "*.flo")) )
+        image_filenames = sorted(glob(os.path.join(root, "*.ppm")))
+        flow_filenames = sorted(glob(os.path.join(root, "*.flo")))
         assert (len(image_filenames)/2 == len(flow_filenames))
         num_flows = len(flow_filenames)
 
         # -------------------------------------------------------------
         # Remove invalid validation indices
         # -------------------------------------------------------------
-        validate_indices = [x for x in VALIDATE_INDICES if x in range(num_flows)]
+        validate_indices = [
+            x for x in VALIDATE_INDICES if x in range(num_flows)]
 
         # ----------------------------------------------------------
         # Construct list of indices for training/validation
         # ----------------------------------------------------------
         list_of_indices = None
         if dstype == "train":
-            list_of_indices = [x for x in range(num_flows) if x not in validate_indices]
+            list_of_indices = [x for x in range(
+                num_flows) if x not in validate_indices]
         elif dstype == "valid":
             list_of_indices = validate_indices
         elif dstype == "full":
@@ -135,8 +137,8 @@ class FlyingChairs(data.Dataset):
             flo = flow_filenames[i]
             im1 = image_filenames[2*i]
             im2 = image_filenames[2*i + 1]
-            self._image_list += [ [ im1, im2 ] ]
-            self._flow_list += [ flo ]
+            self._image_list += [[im1, im2]]
+            self._flow_list += [flo]
         self._size = len(self._image_list)
         assert len(self._image_list) == len(self._flow_list)
 
@@ -148,10 +150,12 @@ class FlyingChairs(data.Dataset):
                 # uint8 -> PIL
                 vision_transforms.ToPILImage(),
                 # PIL -> PIL : random hsv and contrast
-                vision_transforms.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5, hue=0.5),
+                vision_transforms.ColorJitter(
+                    brightness=0.5, contrast=0.5, saturation=0.5, hue=0.5),
                 # PIL -> FloatTensor
                 vision_transforms.transforms.ToTensor(),
-                transforms.RandomGamma(min_gamma=0.7, max_gamma=1.5, clip_image=True),
+                transforms.RandomGamma(
+                    min_gamma=0.7, max_gamma=1.5, clip_image=True),
             ], from_numpy=True, to_numpy=False)
 
         else:

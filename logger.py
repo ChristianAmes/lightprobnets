@@ -12,7 +12,7 @@ import time
 import colorama
 import tqdm
 
-from utils import strings
+import strings
 
 
 def get_default_logging_format(colorize=False, brackets=False):
@@ -123,7 +123,7 @@ class TqdmToLogger(tqdm.tqdm):
         while True:
             try:
                 logging.logbook(msg)
-            except IOError, e:
+            except IOError as e:
                 if e.errno != errno.EINTR:
                     raise ValueError("Logbook TQDM IOError")
                 else:
@@ -167,11 +167,14 @@ def add_logging_level(level_name, level_num, method_name=None):
     if not method_name:
         method_name = level_name.lower()
     if hasattr(logging, level_name):
-        raise AttributeError('{} already defined in logging module'.format(level_name))
+        raise AttributeError(
+            '{} already defined in logging module'.format(level_name))
     if hasattr(logging, method_name):
-        raise AttributeError('{} already defined in logging module'.format(method_name))
+        raise AttributeError(
+            '{} already defined in logging module'.format(method_name))
     if hasattr(logging.getLoggerClass(), method_name):
-        raise AttributeError('{} already defined in logger class'.format(method_name))
+        raise AttributeError(
+            '{} already defined in logger class'.format(method_name))
 
     # This method was inspired by the answers to Stack Overflow post
     # http://stackoverflow.com/q/2183233/2988730, especially
@@ -225,7 +228,8 @@ def configure_logging(filename=None):
         # --------------------------------------------------------------------------------------
         # Configure handler that removes color codes from logbook
         # --------------------------------------------------------------------------------------
-        logbook = logging.FileHandler(filename=filename, mode="a", encoding="utf-8")
+        logbook = logging.FileHandler(
+            filename=filename, mode="a", encoding="utf-8")
         logbook.setLevel(logging.INFO)
         fmt = get_default_logging_format(colorize=False, brackets=True)
         logbook_formatter = LogbookFormatter(fmt=fmt, datefmt=datefmt)
@@ -250,7 +254,8 @@ class LoggingBlock:
         cyan = colorama.Fore.CYAN
         reset = colorama.Style.RESET_ALL
         if emph:
-            logging.info("%s==>%s %s%s%s" % (cyan, reset, bright, title, reset))
+            logging.info("%s==>%s %s%s%s" %
+                         (cyan, reset, bright, title, reset))
         else:
             logging.info(title)
 

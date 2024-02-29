@@ -1,18 +1,19 @@
 from __future__ import absolute_import
 from __future__ import print_function
 
-import numpy as  np
+import numpy as np
 import torch
 import torch.nn as nn
 
-from .endpoint_error import downsample2d_as
-from .endpoint_error import elementwise_epe
+from endpoint_error import downsample2d_as
+from endpoint_error import elementwise_epe
 
 
 def elementwise_laplacian(input_flow, target_flow, min_variance, log_variance):
     if log_variance:
         predictions_mean, predictions_log_variance = input_flow
-        predictions_variance = torch.exp(predictions_log_variance) + min_variance
+        predictions_variance = torch.exp(
+            predictions_log_variance) + min_variance
 
     else:
         predictions_mean, predictions_variance = input_flow
@@ -61,7 +62,8 @@ class MultiScaleLaplacian(nn.Module):
         loss_dict = {}
 
         if self.training:
-            outputs = [output_dict[key] for key in ["flow2", "flow3", "flow4", "flow5", "flow6"]]
+            outputs = [output_dict[key]
+                       for key in ["flow2", "flow3", "flow4", "flow5", "flow6"]]
 
             # div_flow trick
             target = self._args.model_div_flow * target_dict["target1"]

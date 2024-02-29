@@ -15,7 +15,7 @@ import errno
 
 import torch.utils.data as data
 from torchvision import transforms as vision_transforms
-from . import transforms
+import transforms
 
 if sys.version_info[0] == 2:
     import cPickle as pickle
@@ -147,13 +147,14 @@ class _CIFAR10(data.Dataset):
             flip_transform = vision_transforms.RandomHorizontalFlip()
 
         if add_noise:
-            noise_transform = transforms.RandomNoise(min_stddev=0.0, max_stddev=0.02, clip_image=True)
+            noise_transform = transforms.RandomNoise(
+                min_stddev=0.0, max_stddev=0.02, clip_image=True)
 
         if photometric_augmentations is not None:
             brightness_max_delta = photometric_augmentations["brightness_max_delta"]
-            contrast_max_delta   = photometric_augmentations["contrast_max_delta"]
+            contrast_max_delta = photometric_augmentations["contrast_max_delta"]
             saturation_max_delta = photometric_augmentations["saturation_max_delta"]
-            hue_max_delta        = photometric_augmentations["hue_max_delta"]
+            hue_max_delta = photometric_augmentations["hue_max_delta"]
             gamma_min, gamma_max = photometric_augmentations["gamma_min_max"]
             self._photometric_transform = vision_transforms.Compose([
                 vision_transforms.ToPILImage(),
@@ -166,7 +167,8 @@ class _CIFAR10(data.Dataset):
                 affine_transform,
                 flip_transform,
                 vision_transforms.transforms.ToTensor(),
-                transforms.RandomGamma(min_gamma=gamma_min, max_gamma=gamma_max, clip_image=True),
+                transforms.RandomGamma(
+                    min_gamma=gamma_min, max_gamma=gamma_max, clip_image=True),
                 noise_transform,
                 normalize_colors_transform
             ])
@@ -202,7 +204,8 @@ class _CIFAR10(data.Dataset):
 
             self.train_data = np.concatenate(self.train_data)
             self.train_data = self.train_data.reshape((50000, 3, 32, 32))
-            self.train_data = self.train_data.transpose((0, 2, 3, 1))  # convert to HWC
+            self.train_data = self.train_data.transpose(
+                (0, 2, 3, 1))  # convert to HWC
         else:
             f = self.test_list[0][0]
             file = os.path.join(self.root, self.base_folder, f)
@@ -218,7 +221,8 @@ class _CIFAR10(data.Dataset):
                 self.test_labels = entry['fine_labels']
             fo.close()
             self.test_data = self.test_data.reshape((10000, 3, 32, 32))
-            self.test_data = self.test_data.transpose((0, 2, 3, 1))  # convert to HWC
+            self.test_data = self.test_data.transpose(
+                (0, 2, 3, 1))  # convert to HWC
 
     def __getitem__(self, index):
         if self.train:
@@ -229,11 +233,11 @@ class _CIFAR10(data.Dataset):
         img = self._photometric_transform(np_img)
 
         if self.per_image_std:
-            m,n = img.size()[1:3]
-            mu = img.view(3,-1).mean(dim=1, keepdim=True)
-            stddev = img.view(3,-1).std(dim=1, keepdim=True)
+            m, n = img.size()[1:3]
+            mu = img.view(3, -1).mean(dim=1, keepdim=True)
+            stddev = img.view(3, -1).std(dim=1, keepdim=True)
             stddev.clamp_(min=(1.0 / np.sqrt(float(m*n))))
-            img = (img - mu.view(3,1,1)) / stddev.view(3,1,1)
+            img = (img - mu.view(3, 1, 1)) / stddev.view(3, 1, 1)
 
         return img, target
 
@@ -305,15 +309,15 @@ class Cifar10Train(CifarBase):
     def __init__(self,
                  args,
                  root,
-                 photometric_augmentations={ "brightness_max_delta": 0.5,
-                                             "contrast_max_delta": 0.5,
-                                             "saturation_max_delta": 0.5,
-                                             "hue_max_delta": 0.0,
-                                             "gamma_min_max": [0.9, 1.1] },
-                 affine_augmentations={ "degrees": [-5, 5],
-                                        "translate": [0.1, 0.1],
-                                        "scale": [0.9, 1.1],
-                                        "shear": [0, 0] },
+                 photometric_augmentations={"brightness_max_delta": 0.5,
+                                            "contrast_max_delta": 0.5,
+                                            "saturation_max_delta": 0.5,
+                                            "hue_max_delta": 0.0,
+                                            "gamma_min_max": [0.9, 1.1]},
+                 affine_augmentations={"degrees": [-5, 5],
+                                       "translate": [0.1, 0.1],
+                                       "scale": [0.9, 1.1],
+                                       "shear": [0, 0]},
                  random_flip=True,
                  add_noise=False,
                  normalize_colors=False,

@@ -3,7 +3,7 @@ from __future__ import division
 from __future__ import print_function
 
 import zipfile
-from utils import system
+import system
 import os
 
 

@@ -12,16 +12,16 @@ import sys
 import colorama
 import torch
 
-import attacks
+from attacks import fgsm
 import augmentations
 import datasets
 import holistic_records
 import logger
 import losses
 import models
-from utils import json
-from utils import strings
-from utils import type_inference as typeinf
+import json
+import strings
+import type_inference as typeinf
 
 
 def _add_arguments_for_module(parser,
@@ -84,11 +84,13 @@ def _add_arguments_for_module(parser,
         argspec = inspect.getargspec(class_constructor.__init__)
         argspec_defaults = argspec.defaults if argspec.defaults is not None else []
         full_args = argspec.args
-        default_args_dict = dict(zip(argspec.args[-len(argspec_defaults):], argspec_defaults))
+        default_args_dict = dict(
+            zip(argspec.args[-len(argspec_defaults):], argspec_defaults))
     except TypeError:
         print(argspec)
         print(argspec.defaults)
-        raise ValueError("unknown_default_types should be adjusted for module: '%s.py'" % name)
+        raise ValueError(
+            "unknown_default_types should be adjusted for module: '%s.py'" % name)
 
     def _get_type_from_arg(arg):
         if isinstance(arg, bool):
@@ -140,7 +142,8 @@ def _add_arguments_for_module(parser,
         # Take from the unkowns list
         # ---------------------------------------------------------------------
         elif argname in unknown_default_types.keys():
-            parser.add_argument("--%s" % sub_arg_name, type=unknown_default_types[argname])
+            parser.add_argument("--%s" % sub_arg_name,
+                                type=unknown_default_types[argname])
 
         else:
             raise ValueError(
@@ -380,7 +383,8 @@ def postprocess_args(args):
         args.loss_class = loss_classes[args.loss]
 
     if args.lr_scheduler is not None:
-        scheduler_classes = typeinf.module_classes_to_dict(torch.optim.lr_scheduler)
+        scheduler_classes = typeinf.module_classes_to_dict(
+            torch.optim.lr_scheduler)
         args.lr_scheduler_class = scheduler_classes[args.lr_scheduler]
 
     if args.training_dataset is not None:
@@ -441,9 +445,11 @@ def setup_logging_and_parse_arguments(blocktitle):
             color = reset if value == defaults[argument] else colorama.Fore.CYAN
             if isinstance(value, dict):
                 for sub_argument, sub_value in collections.OrderedDict(value).items():
-                    logging.info("{}{}_{}: {}{}".format(color, argument, sub_argument, sub_value, reset))
+                    logging.info("{}{}_{}: {}{}".format(
+                        color, argument, sub_argument, sub_value, reset))
             else:
-                logging.info("{}{}: {}{}".format(color, argument, value, reset))
+                logging.info("{}{}: {}{}".format(
+                    color, argument, value, reset))
 
     # ----------------------------------------------------------------------------
     # Postprocess

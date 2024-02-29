@@ -4,7 +4,7 @@ from __future__ import print_function
 
 import inspect
 
-from .strings import filter_list_of_strings
+from strings import filter_list_of_strings
 
 
 # -------------------------------------------------------------------------------------------------
@@ -66,6 +66,7 @@ def module_classes_to_dict(module, include_classes="*", exclude_classes=()):
     # -------------------------------------------------------------------------
     # Construct dictionary from matched results
     # -------------------------------------------------------------------------
-    result_dict = dict([(name, value) for name, value in item_dict.items() if name in filtered_keys])
+    result_dict = dict(
+        [(name, value) for name, value in item_dict.items() if name in filtered_keys])
 
     return result_dict
